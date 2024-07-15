@@ -5,6 +5,7 @@ bin-release/
 [Bb]in/
 data/
 /kaggle_code
+/pretained_models
 
 # Other files and folders
 .settings/
