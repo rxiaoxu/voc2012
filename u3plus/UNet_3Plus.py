@@ -18,7 +18,7 @@ class UNet_3Plus(nn.Module):
         self.is_batchnorm = is_batchnorm
         self.feature_scale = feature_scale
 
-        filters = [16, 32, 64, 128, 256]
+        filters = [8, 16, 32, 64, 128]
 
         ## -------------Encoder--------------
         self.conv1 = unetConv2(self.in_channels, filters[0], self.is_batchnorm)

@@ -17,8 +17,12 @@ import argparse
 from tqdm import tqdm
 import time
 
+#   引用u3+模型
+from u3plus.UNet_3Plus import UNet_3Plus
+
 parser = argparse.ArgumentParser(description="choose the model")
-parser.add_argument('-m', '--model', default='FCN', type=str, help="输入模型名字", choices=['Unet', 'FCN', 'Deeplab'])
+parser.add_argument('-m','--model', default='Unet3+' ,type= str, help= "输入模型名字",
+                    choices = ['Unet','FCN','Deeplab','Unet3+'])
 parser.add_argument('-g', '--gpu', default=0, type=int, help="输入所需GPU")
 args = parser.parse_args()
 
@@ -39,6 +43,9 @@ elif args.model == "FCN":
 elif args.model == "Deeplab":
     model = 'DeepLabV3'
     net = DeepLabV3(NUM_CLASSES)
+elif args.model == 'Unet3+':
+    model = 'Unet3+'
+    net = UNet_3Plus()
 # -------------------- 生成csv ------------------
 # DATA_ROOT =  './data/'
 # image = os.path.join(DATA_ROOT,'JPEGImages')
