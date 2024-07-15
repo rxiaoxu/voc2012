@@ -79,14 +79,14 @@ def train():
     best_score = 0.0
     start_time = time.time()  # 开始训练的时间
 
-    for e in tqdm(range(epoch), desc='Epoch Progress'):
+    for e in range(epoch):
         net.train()
         epoch_start_time = time.time()  # 记录每个epoch的开始时间
         train_loss = 0.0
         label_true = torch.LongTensor()
         label_pred = torch.LongTensor()
         total_batches = len(train_dataloader)
-        pbar = tqdm(total=total_batches, desc='Batch Progress', position=0)
+        pbar = tqdm(total=total_batches, desc=f'{e}/{epoch} epoch Batch_Progress', position=0)
         for i, (batchdata, batchlabel) in enumerate(train_dataloader):
             if use_gpu:
                 batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
