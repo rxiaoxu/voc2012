@@ -1,0 +1,17 @@
+卷 D 的文件夹 PATH 列表
+卷序列号为 4413-EEBC
+D:.
+├─data
+│  ├─JPEGImages
+│  └─SegmentationClass
+├─model
+│  └─__pycache__
+├─model_result
+├─pretrained_models
+│  └─resnet
+├─u3plus
+│  └─__pycache__
+├─utils
+│  └─__pycache__
+├─更新自述
+└─配置管理
