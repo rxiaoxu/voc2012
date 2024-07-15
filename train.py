@@ -25,7 +25,7 @@ args = parser.parse_args()
 GPU_ID = args.gpu
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
 epoch = 120
@@ -86,7 +86,7 @@ def train():
         label_true = torch.LongTensor()
         label_pred = torch.LongTensor()
         total_batches = len(train_dataloader)
-        pbar = tqdm(total=total_batches, desc=f'{e}/{epoch} epoch Batch_Progress', position=0)
+        pbar = tqdm(total=total_batches, desc=f'{e+1}/{epoch} epoch Batch_Progress', position=0)
         for i, (batchdata, batchlabel) in enumerate(train_dataloader):
             if use_gpu:
                 batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
@@ -113,7 +113,7 @@ def train():
         acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)
 
         print(
-            f'\nepoch: {e + 1}, train_loss: {train_loss:.4f}, acc: {acc:.4f}, acc_cls: {acc_cls:.4f}, mean_iu: {mean_iu:.4f}, fwavacc: {fwavacc:.4f}')
+            f'epoch: {e + 1}, train_loss: {train_loss:.4f}, acc: {acc:.4f}, acc_cls: {acc_cls:.4f}, mean_iu: {mean_iu:.4f}, fwavacc: {fwavacc:.4f}')
         print(f'Time for this epoch: {time.time() - epoch_start_time:.2f} seconds')
 
         with open(result_path, 'a') as f:
