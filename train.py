@@ -4,9 +4,13 @@ import pandas as pd
 import numpy as np
 from utils.DataLoade import CustomDataset
 from torch.utils.data import DataLoader
+
+#   Default Model
 from model.FCN import FCN32s,FCN8x
 from model.Unet import UNet
 from model.DeepLab import DeepLabV3
+
+
 import torch
 import os
 from torch import nn,optim
@@ -17,8 +21,11 @@ import argparse
 from tqdm import tqdm
 import time
 
+
+#   引用u3+模型
+from u3plus.UNet_3Plus import UNet_3Plus
 parser = argparse.ArgumentParser(description="choose the model")
-parser.add_argument('-m','--model', default='FCN' ,type= str, help= "输入模型名字",choices = ['Unet','FCN','Deeplab'])
+parser.add_argument('-m','--model', default='FCN' ,type= str, help= "输入模型名字",choices = ['Unet','FCN','Deeplab','Unet3+'])
 parser.add_argument('-g','--gpu',default=0,type=int,help = "输入所需GPU")
 args = parser.parse_args()
 
@@ -27,10 +34,10 @@ args = parser.parse_args()
 GPU_ID = args.gpu
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
-epoch = 120
+epoch = 10
 
 if args.model == 'Unet':
     model = 'UNet'
@@ -41,6 +48,9 @@ elif args.model == "FCN":
 elif args.model == "Deeplab":
     model = 'DeepLabV3'
     net = DeepLabV3(NUM_CLASSES)
+elif args.model == 'Unet3+':
+    model = 'Unet3+'
+    net = UNet_3Plus()
 # -------------------- 生成csv ------------------
 # DATA_ROOT =  './data/'
 # image = os.path.join(DATA_ROOT,'JPEGImages')
@@ -49,6 +59,7 @@ elif args.model == "Deeplab":
 # tocsv = image2csv(DATA_ROOT,image,label,slice_data,INPUT_WIDTH,INPUT_HEIGHT)
 # tocsv.generate_csv()
 # -------------------------------------------
+
 model_path='./model_result/best_model_{}.mdl'.format(model)
 result_path='./result_{}.txt'.format(model)
 if os.path.exists(result_path):
@@ -89,6 +100,9 @@ def train():
         label_true = torch.LongTensor()
         label_pred = torch.LongTensor()
 
+        #   给一个epoch里更新进度条
+        progress_bar = tqdm(total=len(train_dataloader), desc=f'Epoch {e + 1}/{epoch}', leave=True, position=1)
+
         for i, (batchdata, batchlabel) in enumerate(train_dataloader):
             if use_gpu:
                 batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
@@ -107,6 +121,7 @@ def train():
             train_loss += loss.cpu().item() * batchlabel.size(0)
             label_true = torch.cat((label_true, real), dim=0)
             label_pred = torch.cat((label_pred, pred), dim=0)
+            progress_bar.update(1)
 
         train_loss /= len(train_data)
         acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)

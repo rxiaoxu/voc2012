@@ -4,6 +4,7 @@ bin-release/
 [Oo]bj/
 [Bb]in/
 data/
+/kaggle_code
 
 # Other files and folders
 .settings/
