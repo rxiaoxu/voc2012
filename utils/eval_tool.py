@@ -2,6 +2,16 @@ import numpy as np
 
 #得到混淆矩阵
 def _fast_hist(label_true, label_pred, n_class):
+    """
+     :param label_pred: numpy data, shape:[batch,h,w]
+     :param label_trues:同上
+     :param n_class:类别数
+     Returns accuracy score evaluation result.
+      - overall accuracy
+      - mean accuracy
+      - mean IU
+      - fwavacc
+    """
     mask = (label_true >= 0) & (label_true < n_class)
     hist = np.bincount(
         n_class * label_true[mask].astype(int) +
