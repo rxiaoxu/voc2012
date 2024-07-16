@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from utils.DataLoader import CustomDataset
+from utils.DataLoade import CustomDataset
 # from torch.utils.data import DataLoader
 from model.FCN import FCN32s, FCN8x
 from model.Unet import UNet
@@ -35,7 +35,7 @@ net = FCN8x(NUM_CLASSES)
 
 def evaluate(model):
     import random
-    from utils.DataLoader import label2image, RandomCrop
+    from utils.DataLoade import label2image, RandomCrop
     import matplotlib.pyplot as plt
     from torch.utils.data import DataLoader
     from PIL import Image

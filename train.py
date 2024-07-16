@@ -2,7 +2,7 @@
 # here put the import lib
 import pandas as pd
 import numpy as np
-from utils.DataLoader import CustomDataset
+from utils.DataLoade import CustomDataset
 from torch.utils.data import DataLoader
 from model.FCN import FCN32s, FCN8x
 from model.Unet import UNet
@@ -21,7 +21,7 @@ import time
 from u3plus.UNet_3Plus import UNet_3Plus
 
 parser = argparse.ArgumentParser(description="choose the model")
-parser.add_argument('-m','--model', default='Unet3+' ,type= str, help= "输入模型名字",
+parser.add_argument('-m','--model', default='FCN' ,type= str, help= "输入模型名字",
                     choices = ['Unet','FCN','Deeplab','Unet3+'])
 parser.add_argument('-g', '--gpu', default=0, type=int, help="输入所需GPU")
 args = parser.parse_args()
@@ -29,7 +29,7 @@ args = parser.parse_args()
 GPU_ID = args.gpu
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
-BATCH_SIZE = 8
+BATCH_SIZE = 32
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
 epoch = 120
@@ -56,6 +56,10 @@ elif args.model == 'Unet3+':
 # -------------------------------------------
 model_path = './model_result/best_model_{}.mdl'.format(model)
 result_path = './result_{}.txt'.format(model)
+
+net.loadIFExist(model_path)
+
+
 if os.path.exists(result_path):
     os.remove(result_path)
 
@@ -117,7 +121,7 @@ def train():
         # 关闭进度条
         pbar.close()
         train_loss /= len(train_data)
-        acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)
+        acc, acc_cls, mean_iu, fwavacc, _, _ = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)
 
         print(
             f'epoch: {e + 1}, train_loss: {train_loss:.4f}, acc: {acc:.4f}, acc_cls: {acc_cls:.4f}, mean_iu: {mean_iu:.4f}, fwavacc: {fwavacc:.4f}')
@@ -148,7 +152,7 @@ def train():
                 val_label_pred = torch.cat((val_label_pred, pred), dim=0)
 
             val_loss /= len(val_data)
-            val_acc, val_acc_cls, val_mean_iu, val_fwavacc = label_accuracy_score(val_label_true.numpy(),
+            val_acc, val_acc_cls, val_mean_iu, val_fwavacc, _, _ = label_accuracy_score(val_label_true.numpy(),
                                                                                   val_label_pred.numpy(), NUM_CLASSES)
 
         print(

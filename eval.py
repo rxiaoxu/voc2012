@@ -1,84 +1,82 @@
-import argparse
-from utils.transform import Resize,Compose,ToTensor,Normalize
-from utils.datasets import SegData
-import torch
-import os
-import numpy as np
 from tqdm import tqdm
-from models.Simplify_Net import Simplify_Net
-from utils.metrics import Evaluator
-from models.Unet import UNet
 
-from u3plus.UNet_3Plus import UNet_3Plus
-def get_args_parser():
-    parser = argparse.ArgumentParser('Eval Model', add_help=False)
-    parser.add_argument('--batch_size', default=1, type=int,help='Batch size for training')
-    parser.add_argument('--input_size', default=[224,224],nargs='+',type=int,help='images input size')
-    parser.add_argument('--data_path', default='./datasets/', type=str,help='dataset path')
-    parser.add_argument('--weights', default='./output_dir/best.pth', type=str,help='dataset path')
-    parser.add_argument('--nb_classes', default=2, type=int,help='number of the classification types')
-    parser.add_argument('--device', default='cuda',help='device to use for training / testing')
-    parser.add_argument('--num_workers', default=4, type=int)
+from utils.DataLoade import CustomDataset
+from torch.utils.data import DataLoader
+import torch
+from torch.nn import functional as F
+from model.FCN import FCN8x
+from utils.eval_tool import label_accuracy_score
 
-    return parser
+import numpy as np
+
+BATCH_SIZE = 32
+INPUT_WIDTH = 320
+INPUT_HEIGHT = 320
+GPU_ID = 0
+NUM_CLASSES = 21
 
 
-def main(args):
+def main():
+    val_csv_dir = 'val.csv'
+    val_data = CustomDataset(val_csv_dir, INPUT_WIDTH, INPUT_HEIGHT)
+    val_dataloader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
-    device = torch.device(args.device)
+    model = 'FCN8x'
+    model_path = './model_result/best_model_{}.mdl'.format(model)
+    net = FCN8x(NUM_CLASSES)
+    net.load_state_dict(torch.load(model_path, map_location='cuda'))
+    net.cuda()
+    net.eval()
 
-    segmetric = Evaluator(args.nb_classes)
-    segmetric.reset()
+    use_gpu = torch.cuda.is_available()
 
-    val_transform = Compose([
-                                    Resize(args.input_size),
-                                    ToTensor(),
-                                    Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                            ])
+    torch.cuda.set_device(GPU_ID)
 
-    val_dataset = SegData(image_path=os.path.join(args.data_path, 'images/val'),
-                            mask_path=os.path.join(args.data_path, 'labels/val'),
-                            data_transforms=val_transform)
-    val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=args.batch_size, shuffle=False,
-                                             num_workers=args.num_workers)
+    pbar = tqdm(total=len(val_dataloader))
+    criterion = torch.nn.CrossEntropyLoss()
 
-    # model = Simplify_Net(args.nb_classes)
-    model = UNet()
-    # model = UNet_3Plus()
-    checkpoint = torch.load(args.weights, map_location='cpu')
-    msg = model.load_state_dict(checkpoint, strict=True)
-    print(msg)
-
-    model.to(device)
-    model.eval()
-
-    classes = ["background","human"]
+    val_loss = 0.0
+    val_label_true = torch.LongTensor()
+    val_label_pred = torch.LongTensor()
 
     with torch.no_grad():
-        with tqdm(total=len(val_loader)) as pbar:
-            for image, label in val_loader:
-                output = model(image.to(device))
-                pred = output.data.cpu().numpy()
-                label = (label / 255).to(device).long()  # 转换标签值从255到1
+        for i, (batchdata, batchlabel) in enumerate(val_dataloader):
+            if use_gpu:
+                batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
 
-                label = label.cpu().numpy()
-                pred = np.argmax(pred, axis=1)
-                segmetric.add_batch(label, pred)
-                pbar.update(1)
+            output = net(batchdata)
+            output = F.log_softmax(output, dim=1)
+            loss = criterion(output, batchlabel)
+            pred = output.argmax(dim=1).squeeze().data.cpu()
+            real = batchlabel.data.cpu()
+            val_loss += loss.cpu().item() * batchlabel.size(0)
+            val_label_true = torch.cat((val_label_true, real), dim=0)
+            val_label_pred = torch.cat((val_label_pred, pred), dim=0)
 
-    pix_acc = segmetric.Pixel_Accuracy()
-    every_iou,miou = segmetric.Mean_Intersection_over_Union()
+            pbar.update(1)
 
-    print("Pixel Accuracy is :", pix_acc)
+        val_loss /= len(val_data)
+        val_acc, val_acc_cls, val_mean_iu, val_fwavacc, cls_iou, cls_acc = label_accuracy_score(val_label_true.numpy(),
+                                                                                                val_label_pred.numpy(),
+                                                                                                NUM_CLASSES)
+        #   val_acc
+        #   val_acc_cls
+        #   val_mean_iu
+        #   val_fwavacc
+
+        print(
+            f'val_loss: {val_loss:.4f}, acc: {val_acc:.4f}, acc_cls: {val_acc_cls:.4f}, mean_iu: {val_mean_iu:.4f}, fwavacc: {val_fwavacc:.4f}')
+
+    classes = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
+               'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',
+               'dog', 'horse', 'motorbike', 'person', 'potted plant',
+               'sheep', 'sofa', 'train', 'tv/monitor']
     print("==========Every IOU==========")
-    for name,prob in zip(classes,every_iou):
-        print(name+" : "+str(prob))
+    for name, prob in zip(classes, cls_iou):
+        print(name + " : " + str(prob))
     print("=============================")
-    print("MiOU is :", miou)
-
+    print(np.nanmean(cls_iou))
 
 
 if __name__ == '__main__':
-    args = get_args_parser()
-    args = args.parse_args()
-    main(args)
+    main()
