@@ -444,6 +444,14 @@ class UNet_3Plus_DeepSup(nn.Module):
                 init_weights(m, init_type='kaiming')
             elif isinstance(m, nn.BatchNorm2d):
                 init_weights(m, init_type='kaiming')
+    def loadIFExist(self, model_path):
+        model_list = os.listdir('./model_result')
+
+        model_pth = os.path.basename(model_path)
+
+        if model_pth in model_list:
+            self.load_state_dict(torch.load(model_path))
+            print("the latest model has been load")
 
     def forward(self, inputs):
         ## -------------Encoder-------------
