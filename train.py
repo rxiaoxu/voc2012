@@ -30,7 +30,7 @@ args = parser.parse_args()
 GPU_ID = args.gpu
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
-BATCH_SIZE = 8
+BATCH_SIZE = 32
 
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
