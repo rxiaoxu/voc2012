@@ -47,6 +47,15 @@ def label_accuracy_score(label_trues, label_preds, n_class):
     mean_iu = np.nanmean(iu)
 
     freq = hist.sum(axis=1) / hist.sum()
-    #   fwavacc加权交并比？
+    #   fwavacc加权交并比
     fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
-    return acc, mean_acc_cls, mean_iu, fwavacc, iu, acc_cls
+
+
+
+    dice = np.zeros(n_class)
+    for i in range(n_class):
+        dice[i] = (2 * np.diag(hist)[i]) / (hist.sum(axis=1)[i] + hist.sum(axis=0)[i])
+
+    mean_dice = np.nanmean(dice)
+
+    return acc, mean_acc_cls, mean_iu, fwavacc, iu, acc_cls, dice, mean_dice

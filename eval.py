@@ -56,7 +56,7 @@ def main():
             pbar.update(1)
 
         val_loss /= len(val_data)
-        val_acc, val_acc_cls, val_mean_iu, val_fwavacc, cls_iou, cls_acc = label_accuracy_score(val_label_true.numpy(),
+        val_acc, val_acc_cls, val_mean_iu, val_fwavacc, cls_iou, cls_acc, dice, mean_dice = label_accuracy_score(val_label_true.numpy(),
                                                                                                 val_label_pred.numpy(),
                                                                                                 NUM_CLASSES)
         #   val_acc
@@ -65,7 +65,7 @@ def main():
         #   val_fwavacc
 
         print(
-            f'val_loss: {val_loss:.4f}, acc: {val_acc:.4f}, acc_cls: {val_acc_cls:.4f}, mean_iu: {val_mean_iu:.4f}, fwavacc: {val_fwavacc:.4f}')
+            f'val_loss: {val_loss:.4f}, acc: {val_acc:.4f}, acc_cls: {val_acc_cls:.4f}, mean_iu: {val_mean_iu:.4f}, fwavacc: {val_fwavacc:.4f}, mean_dice: {mean_dice:.4f}')
 
     classes = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
                'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable',

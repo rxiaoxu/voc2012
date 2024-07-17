@@ -121,7 +121,7 @@ def train():
         # 关闭进度条
         pbar.close()
         train_loss /= len(train_data)
-        acc, acc_cls, mean_iu, fwavacc, _, _ = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)
+        acc, acc_cls, mean_iu, fwavacc, _, _, _, _ = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)
 
         print(
             f'epoch: {e + 1}, train_loss: {train_loss:.4f}, acc: {acc:.4f}, acc_cls: {acc_cls:.4f}, mean_iu: {mean_iu:.4f}, fwavacc: {fwavacc:.4f}')
@@ -152,7 +152,7 @@ def train():
                 val_label_pred = torch.cat((val_label_pred, pred), dim=0)
 
             val_loss /= len(val_data)
-            val_acc, val_acc_cls, val_mean_iu, val_fwavacc, _, _ = label_accuracy_score(val_label_true.numpy(),
+            val_acc, val_acc_cls, val_mean_iu, val_fwavacc, _, _, _, _ = label_accuracy_score(val_label_true.numpy(),
                                                                                   val_label_pred.numpy(), NUM_CLASSES)
 
         print(
