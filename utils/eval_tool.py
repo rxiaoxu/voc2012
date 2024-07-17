@@ -1,5 +1,6 @@
 import numpy as np
 
+
 #得到混淆矩阵
 def _fast_hist(label_true, label_pred, n_class):
     """
@@ -20,6 +21,7 @@ def _fast_hist(label_true, label_pred, n_class):
 
     return hist
 
+
 # 计算图像分割衡量系数
 def label_accuracy_score(label_trues, label_preds, n_class):
     """
@@ -33,7 +35,7 @@ def label_accuracy_score(label_trues, label_preds, n_class):
       - fwavacc
     """
     hist = np.zeros((n_class, n_class))
-    for lt, lp in zip(label_trues,label_preds):
+    for lt, lp in zip(label_trues, label_preds):
         hist += _fast_hist(lt.flatten(), lp.flatten(), n_class)
     #
     acc = np.diag(hist).sum() / hist.sum()
@@ -42,7 +44,7 @@ def label_accuracy_score(label_trues, label_preds, n_class):
     #   这里覆盖了 变成了类别像素准确率的平均值
     mean_acc_cls = np.nanmean(acc_cls)
     #   类别交并比
-    iu = np.diag(hist) / ( hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist) )
+    iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
     #   平均交并比
     mean_iu = np.nanmean(iu)
 
@@ -50,11 +52,11 @@ def label_accuracy_score(label_trues, label_preds, n_class):
     #   fwavacc加权交并比
     fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
 
-
-
+    #   防止出现0/0的情况，这样会报错。所以加一个很小很小的值 并不影响总体的计算
+    smooth = 1e-8
     dice = np.zeros(n_class)
     for i in range(n_class):
-        dice[i] = (2 * np.diag(hist)[i]) / (hist.sum(axis=1)[i] + hist.sum(axis=0)[i])
+        dice[i] = (2 * np.diag(hist)[i] + smooth) / (hist.sum(axis=1)[i] + hist.sum(axis=0)[i] + smooth)
 
     mean_dice = np.nanmean(dice)
 
