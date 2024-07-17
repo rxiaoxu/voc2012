@@ -160,22 +160,17 @@ class FCN8x(nn.Module):
     def forward(self, x):
         x = self.stage1(x)
         s1 = x  # 1/8
-
         x = self.stage2(x)
         s2 = x  # 1/16
-
         x = self.stage3(x)
         s3 = x  # 1/32
-
         s3 = self.scores1(s3)
         s3 = self.upsample_2x(s3)
         s2 = self.scores2(s2)
         s2 = s2 + s3
-
         s1 = self.scores3(s1)
         s2 = self.upsample_4x(s2)
         s = s1 + s2
-
         s = self.upsample_8x(s2)
         return s
 

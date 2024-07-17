@@ -13,6 +13,7 @@ __pycached__/
 user_results/
 /model/__pycache__
 /utils/__pycache__
+/u3plus/__pycache__
 **/__pycache__/
 # Other files and folders
 .settings/
