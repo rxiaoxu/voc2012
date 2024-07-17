@@ -6,7 +6,7 @@ bin-release/
 data/
 /kaggle_code
 pretrained_models/
-/model_result
+model_result/*
 # Other files and folders
 .settings/
 
