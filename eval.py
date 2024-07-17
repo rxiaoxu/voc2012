@@ -9,7 +9,7 @@ from utils.eval_tool import label_accuracy_score
 
 import numpy as np
 
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
 GPU_ID = 0
