@@ -5,8 +5,13 @@ bin-release/
 [Bb]in/
 data/
 /kaggle_code
-/pretrained_models
+pretrained_models/
+model_result/*
+pic_results/*
 
+user_results/
+
+**/__pycache__
 # Other files and folders
 .settings/
 

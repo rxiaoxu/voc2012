@@ -8,40 +8,36 @@ from model.Unet import UNet
 import torch
 import torchvision.transforms as transforms
 import os
+from tkinter import messagebox
 from model.DeepLab import DeepLabV3
 # from torch import nn,optim
 # from torch.nn import functional as F
 from utils.eval_tool import label_accuracy_score
 
-# model = 'UNet'
-model = 'FCN8x'
-# model = 'DeepLabV3'
 GPU_ID = 0
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
 BATCH_SIZE = 32
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
-model_path = './model_result/best_model_{}.mdl'.format(model)
 torch.cuda.set_device(GPU_ID)
-net = FCN8x(NUM_CLASSES)
 
 
-# net = DeepLabV3(NUM_CLASSES)
-# net = UNet(3,NUM_CLASSES)
-# 加载网络进行测试
-
-
-def evaluate(val_image_path):
-    from utils.DataLoade import label2image, RandomCrop, image2label
+def evaluate(val_image_path, model_e):
+    from utils.DataLoade import label2image, image2label
     import matplotlib.pyplot as plt
     from PIL import Image
+    model_path = './model_result/best_model_{}.mdl'.format(model_e)
+    if model_e == 'FCN8x':
+        net = FCN8x(NUM_CLASSES)
+    elif model_e == 'UNet':
+        net = UNet(3, NUM_CLASSES)
+    elif model_e == 'DeepLabV3':
+        net = DeepLabV3(NUM_CLASSES)
     image_name = os.path.basename(val_image_path)
     val_label_path = './data/SegmentationClass/' + image_name
     val_label_path = os.path.splitext(val_label_path)[0] + '.png'
     image_name = os.path.basename(val_label_path)
-    print(val_label_path)
-    print(val_image_path)
     val_image = Image.open(val_image_path)
     val_label = Image.open(val_label_path).convert('RGB').resize((320, 320))
     tfs = transforms.Compose([
@@ -68,7 +64,7 @@ def evaluate(val_image_path):
     ax[0].imshow(val_image)
     ax[1].imshow(val_label)
     ax[2].imshow(val_pre.squeeze())
-    save_path = './user_results/pic_{}_{}'.format(model, image_name)
+    save_path = './user_results/pic_{}_{}'.format(model_e, image_name)
     plt.savefig(save_path)
     # plt.show()
     return save_path
@@ -113,9 +109,11 @@ class StartWindow(tk.Tk):
         super().__init__()
         self.title("Start Window")
         self.geometry("500x500")
-
+        self.selected_option = 'FCN8x'
         start_button = tk.Button(self, text="Select Picture", command=self.open_image)
         start_button.pack(pady=20)
+        model_button = tk.Button(self, text='Choose Model', command=self.choose_model)
+        model_button.pack(pady=20)
         close_button = tk.Button(self, text='Close', command=self.close_window)
         close_button.pack(pady=20)
 
@@ -123,10 +121,29 @@ class StartWindow(tk.Tk):
         file_path = filedialog.askopenfilename()
         if file_path:
             self.withdraw()
-            ImageWindow(parent=self, image_path=evaluate(file_path))
+            ImageWindow(parent=self, image_path=evaluate(val_image_path=file_path, model_e=self.selected_option))
 
     def close_window(self):
         self.destroy()
+
+    def choose_model(self):
+        def select_option(opt):
+            # 更新选择的选项
+            self.selected_option = opt
+            # 显示选择的选项
+            messagebox.showinfo("选择的选项", f"你选择了：{opt}")
+            # 关闭选择窗口
+            selection_window.destroy()
+
+        # 创建一个新的选择窗口
+        selection_window = tk.Toplevel(self)
+        selection_window.title("选择窗口")
+
+        # 创建选项按钮
+        options = ["FCN8x", "UNet", "DeepLabV3"]
+        for option in options:
+            button = tk.Button(selection_window, text=option, command=lambda opt=option: select_option(opt))
+            button.pack(pady=5)
 
 
 if __name__ == "__main__":
