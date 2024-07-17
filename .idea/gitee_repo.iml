@@ -2,7 +2,11 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
+<<<<<<< HEAD
     <orderEntry type="jdk" jdkName="fseg (4)" jdkType="Python SDK" />
+=======
+    <orderEntry type="jdk" jdkName="Python 3.8 (unet)" jdkType="Python SDK" />
+>>>>>>> a7a86ccf441562b430b119f48084974623567385
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

@@ -58,7 +58,7 @@ def evaluate(val_image_path, model_e):
         colormap = np.array(colormap).astype('uint8')
         val_pre = colormap[pred]
 
-    fig, ax = plt.subplots(1, 2, figsize=(15, 10))
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
     ax[0].imshow(val_image)
     ax[1].imshow(val_pre.squeeze())
     ax[0].axis('off')
@@ -166,6 +166,13 @@ class StartWindow:
         model_button.pack(pady=20)
         close_button = tk.Button(self.root, text='Close', command=self.close_window)
         close_button.pack(pady=20)
+        his_button = tk.Button(self.root, text='View History', command=self.view_his)
+        his_button.pack(pady=20)
+
+    def view_his(self):
+        self.root.withdraw()
+        image_his = ImageSwitcher(self)
+        image_his.show()
 
     def open_image(self):
         file_path = filedialog.askopenfilename()

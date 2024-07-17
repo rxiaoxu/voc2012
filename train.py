@@ -21,7 +21,7 @@ import time
 from u3plus.UNet_3Plus import UNet_3Plus
 
 parser = argparse.ArgumentParser(description="choose the model")
-parser.add_argument('-m','--model', default='Unet3+' ,type= str, help= "输入模型名字",
+parser.add_argument('-m','--model', default='FCN' ,type= str, help= "输入模型名字",
                     choices = ['Unet','FCN','Deeplab','Unet3+'])
 parser.add_argument('-g', '--gpu', default=0, type=int, help="输入所需GPU")
 args = parser.parse_args()
@@ -29,7 +29,11 @@ args = parser.parse_args()
 GPU_ID = args.gpu
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
+<<<<<<< HEAD
 BATCH_SIZE = 4
+=======
+BATCH_SIZE = 16
+>>>>>>> a7a86ccf441562b430b119f48084974623567385
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
 epoch = 120
@@ -56,6 +60,10 @@ elif args.model == 'Unet3+':
 # -------------------------------------------
 model_path = './model_result/best_model_{}.mdl'.format(model)
 result_path = './result_{}.txt'.format(model)
+
+
+
+
 if os.path.exists(result_path):
     os.remove(result_path)
 
@@ -86,38 +94,39 @@ def train():
     best_score = 0.0
     start_time = time.time()  # 开始训练的时间
 
+    net.loadIFExist(model_path)
+
     for e in range(epoch):
         net.train()
         epoch_start_time = time.time()  # 记录每个epoch的开始时间
         train_loss = 0.0
         label_true = torch.LongTensor()
         label_pred = torch.LongTensor()
-        total_batches = len(train_dataloader)
-        pbar = tqdm(total=total_batches, desc=f'{e+1}/{epoch} epoch Batch_Progress', position=0)
-        for i, (batchdata, batchlabel) in enumerate(train_dataloader):
-            if use_gpu:
-                batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
+        #   train的进度条
+        with tqdm(total=len(train_dataloader), desc=f'{e+1}/{epoch} epoch Train_Progress') as pb_train:
+            for i, (batchdata, batchlabel) in enumerate(train_dataloader):
+                if use_gpu:
+                    batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
 
-            output = net(batchdata)
-            output = F.log_softmax(output, dim=1)
-            loss = criterion(output, batchlabel)
+                output = net(batchdata)
+                output = F.log_softmax(output, dim=1)
+                loss = criterion(output, batchlabel)
 
-            pred = output.argmax(dim=1).squeeze().data.cpu()
-            real = batchlabel.data.cpu()
+                pred = output.argmax(dim=1).squeeze().data.cpu()
+                real = batchlabel.data.cpu()
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
-            train_loss += loss.cpu().item() * batchlabel.size(0)
-            label_true = torch.cat((label_true, real), dim=0)
-            label_pred = torch.cat((label_pred, pred), dim=0)
-            pbar.update(1) # 更新进度条
+                train_loss += loss.cpu().item() * batchlabel.size(0)
+                label_true = torch.cat((label_true, real), dim=0)
+                label_pred = torch.cat((label_pred, pred), dim=0)
+                pb_train.update(1)
 
-        # 关闭进度条
-        pbar.close()
+
         train_loss /= len(train_data)
-        acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)
+        acc, acc_cls, mean_iu, fwavacc, _, _, _, _ = label_accuracy_score(label_true.numpy(), label_pred.numpy(), NUM_CLASSES)
 
         print(
             f'epoch: {e + 1}, train_loss: {train_loss:.4f}, acc: {acc:.4f}, acc_cls: {acc_cls:.4f}, mean_iu: {mean_iu:.4f}, fwavacc: {fwavacc:.4f}')
@@ -131,24 +140,27 @@ def train():
         val_loss = 0.0
         val_label_true = torch.LongTensor()
         val_label_pred = torch.LongTensor()
-        with torch.no_grad():
-            for i, (batchdata, batchlabel) in enumerate(val_dataloader):
-                if use_gpu:
-                    batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
+        with tqdm(total=len(val_dataloader), desc=f'{e+1}/{epoch} epoch Val_Progress') as pb_val:
+            with torch.no_grad():
+                for i, (batchdata, batchlabel) in enumerate(val_dataloader):
+                    if use_gpu:
+                        batchdata, batchlabel = batchdata.cuda(), batchlabel.cuda()
 
-                output = net(batchdata)
-                output = F.log_softmax(output, dim=1)
-                loss = criterion(output, batchlabel)
+                    output = net(batchdata)
+                    output = F.log_softmax(output, dim=1)
+                    loss = criterion(output, batchlabel)
 
-                pred = output.argmax(dim=1).squeeze().data.cpu()
-                real = batchlabel.data.cpu()
+                    pred = output.argmax(dim=1).squeeze().data.cpu()
+                    real = batchlabel.data.cpu()
 
-                val_loss += loss.cpu().item() * batchlabel.size(0)
-                val_label_true = torch.cat((val_label_true, real), dim=0)
-                val_label_pred = torch.cat((val_label_pred, pred), dim=0)
+                    val_loss += loss.cpu().item() * batchlabel.size(0)
+                    val_label_true = torch.cat((val_label_true, real), dim=0)
+                    val_label_pred = torch.cat((val_label_pred, pred), dim=0)
+
+                    pb_val.update(1)
 
             val_loss /= len(val_data)
-            val_acc, val_acc_cls, val_mean_iu, val_fwavacc = label_accuracy_score(val_label_true.numpy(),
+            val_acc, val_acc_cls, val_mean_iu, val_fwavacc, _, _, _, _ = label_accuracy_score(val_label_true.numpy(),
                                                                                   val_label_pred.numpy(), NUM_CLASSES)
 
         print(
