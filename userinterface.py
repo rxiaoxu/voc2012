@@ -68,10 +68,16 @@ def evaluate(val_image_path):
     ax[0].imshow(val_image)
     ax[1].imshow(val_label)
     ax[2].imshow(val_pre.squeeze())
-    save_path = './user_results/pic_{}_{}'.format(model, image_name)
-    plt.savefig(save_path)
+
+    save_path = './user_results'
+    save_format = './user_results/pic_{}_{}'.format(model, image_name)
+
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    plt.savefig(save_format)
     # plt.show()
-    return save_path
+    return save_format
 
 
 class ImageWindow(tk.Toplevel):

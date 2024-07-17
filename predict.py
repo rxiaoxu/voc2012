@@ -85,5 +85,3 @@ def evaluate(model):
 
 if __name__ == "__main__":
     evaluate(model)
-    app = window.ImageSwitcher()
-    app.mainloop()
