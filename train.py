@@ -32,7 +32,7 @@ BATCH_SIZE = 32
 
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
-epoch = 120
+epoch = 250
 
 if args.model == 'Unet':
     model = 'UNet'
