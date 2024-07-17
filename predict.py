@@ -10,7 +10,7 @@ from model.DeepLab import DeepLabV3
 # from torch import nn,optim
 # from torch.nn import functional as F
 from utils.eval_tool import label_accuracy_score
-import window
+import history
 
 # model = 'UNet'
 model = 'FCN8x'
@@ -85,3 +85,4 @@ def evaluate(model):
 
 if __name__ == "__main__":
     evaluate(model)
+
