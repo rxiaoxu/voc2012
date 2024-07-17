@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 # here put the import lib
+import os.path
+
 import torch
 from torch import nn
 from torchvision import models
@@ -146,6 +148,15 @@ class FCN8x(nn.Module):
         self.upsample_2x = nn.ConvTranspose2d(num_classes, num_classes, 4, 2, 1, bias=False)
         self.upsample_2x.weight.data = bilinear_kernel(num_classes, num_classes, 4)  # 使用双线性 kernel
 
+
+    def loadIFExist(self,model_path):
+        model_list = os.listdir('./model_result')
+
+        model_pth = os.path.basename(model_path)
+
+        if model_pth in model_list:
+            self.load_state_dict(torch.load(model_path))
+            print("the latest model has been load")
     def forward(self, x):
         x = self.stage1(x)
         s1 = x  # 1/8

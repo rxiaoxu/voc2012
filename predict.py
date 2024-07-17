@@ -18,9 +18,10 @@ model = 'FCN8x'
 GPU_ID = 0
 INPUT_WIDTH = 320
 INPUT_HEIGHT = 320
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
+
 model_path = './model_result/best_model_{}.mdl'.format(model)
 # model_path='./model_result/best_model_{}_kaggle.mdl'.format(model)
 
@@ -31,29 +32,34 @@ net = FCN8x(NUM_CLASSES)
 # net = DeepLabV3(NUM_CLASSES)
 # net = UNet(3,NUM_CLASSES)
 # 加载网络进行测试
+
+
 def evaluate(model):
     import random
     from utils.DataLoade import label2image, RandomCrop
     import matplotlib.pyplot as plt
     from torch.utils.data import DataLoader
     from PIL import Image
+    # @qyk
+    from tqdm import tqdm
 
     test_csv_dir = 'test.csv'
     testset = CustomDataset(test_csv_dir, INPUT_WIDTH, INPUT_HEIGHT)
-    test_dataloader = DataLoader(testset, batch_size=15, shuffle=False)
+    test_dataloader = DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False)
 
     net.load_state_dict(torch.load(model_path, map_location='cuda'))
     # index = random.randint(0, len(testset) - 1)
     # index = [5,6]
+    pbar = tqdm(total=BATCH_SIZE)
     for (val_image, val_label) in test_dataloader:
         # val_image, val_label = test_dataloader[1]
         net.cuda()
-        out = net(val_image.cuda())  # [10, 21, 320, 320]
-        pred = out.argmax(dim=1).squeeze().data.cpu().numpy()  # [10,320,320]
-        label = val_label.data.numpy()  # [10,320,320]
+        out = net(val_image.cuda())  # [Batch_size, NUM_CLASSES, INPUT_HEIGHT, INPUT_WIDTH]
+        pred = out.argmax(dim=1).squeeze().data.cpu().numpy()  # [Batch_size, INPUT_HEIGHT, INPUT_WIDTH]
+        label = val_label.data.numpy()
         val_pred, val_label = label2image(NUM_CLASSES)(pred, label)
 
-        for i in range(15):
+        for i in range(BATCH_SIZE):
             val_imag = val_image[i]
             val_pre = val_pred[i]
             val_labe = val_label[i]
@@ -72,7 +78,9 @@ def evaluate(model):
             ax[2].imshow(val_pre)
             # plt.show()
             plt.savefig('./pic_results/pic_{}_{}.png'.format(model, i))
-        break  # 只显示一个batch
+            # 更新进度条
+            pbar.update(1)
+        break  # 只显示一个batch 否则会一直生成下去
 
 
 if __name__ == "__main__":

@@ -21,7 +21,10 @@ class CustomDataset(Dataset):
     def __init__(self,data_root_csv,input_width,input_height,test=False):
         super(CustomDataset, self).__init__()  # 在子类进行初始化时，也想继承父类的__init__()就通过super()实现
         self.data_root_csv = data_root_csv
+        #   data_all.shape = (image_num, col)
         self.data_all = pd.read_csv(self.data_root_csv)
+        #   iloc是pandas的方法，也就是通过索引方式查找。也就是我们熟悉的数组0，1，2，3
+        #   之所有iloc这个方法，是因为pandas的组织比较特别。他是可以自定义索引的，也就是你的索引可以是A，B，C。对应的寻找方法是loc
         self.image_list = list(self.data_all.iloc[:,0])
         self.label_list = list(self.data_all.iloc[:,1])
         self.width = input_width
