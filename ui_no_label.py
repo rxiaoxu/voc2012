@@ -1,7 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 from tkinter import filedialog
-import pandas as pd
 import numpy as np
 from model.FCN import FCN32s, FCN8x
 from model.Unet import UNet
@@ -11,9 +10,6 @@ import os
 from tkinter import messagebox
 from model.DeepLab import DeepLabV3
 from history import ImageSwitcher
-# from torch import nn,optim
-# from torch.nn import functional as F
-from utils.eval_tool import label_accuracy_score
 
 GPU_ID = 0
 INPUT_WIDTH = 320
@@ -171,7 +167,7 @@ class StartWindow:
 
     def view_his(self):
         self.root.withdraw()
-        image_his = ImageSwitcher(self)
+        image_his = ImageSwitcher(self.root)
         image_his.show()
 
     def open_image(self):
