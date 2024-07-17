@@ -83,6 +83,7 @@ def evaluate(model):
         break  # 只显示一个batch 否则会一直生成下去
 
 
+
 if __name__ == "__main__":
     evaluate(model)
 
