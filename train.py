@@ -36,7 +36,7 @@ BATCH_SIZE = 4
 
 NUM_CLASSES = 21
 LEARNING_RATE = 1e-3
-epoch = 5
+epoch = 20
 
 if args.model == 'Unet':
     model = 'UNet'
@@ -73,7 +73,7 @@ if not os.path.exists(tensor_path):
 if os.path.exists(result_path):
     os.remove(result_path)
 
-train_csv_dir = 'val.csv'
+train_csv_dir = 'train.csv'
 
 val_csv_dir = 'val.csv'
 train_data = CustomDataset(train_csv_dir, INPUT_WIDTH, INPUT_HEIGHT)
