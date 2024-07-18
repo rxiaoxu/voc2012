@@ -65,9 +65,10 @@ elif args.model == 'Unet3+_Sup':
 # -------------------------------------------
 model_path = './model_result/best_model_{}.mdl'.format(model)
 result_path = './result_{}.txt'.format(model)
+tensor_path = './tensorboard'
 
-
-
+if not os.path.exists(tensor_path):
+    os.mkdir(tensor_path)
 
 if os.path.exists(result_path):
     os.remove(result_path)
