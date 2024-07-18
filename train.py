@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from utils.DataLoade import CustomDataset
 from torch.utils.data import DataLoader
-from model.FCN import FCN32s, FCN8x
+#from model.FCN import FCN32s, FCN8x
 from model.Unet import UNet
 from model.DeepLab import DeepLabV3
 import torch
