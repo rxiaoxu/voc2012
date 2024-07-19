@@ -2,6 +2,9 @@ import torch
 import torchvision.models as models
 import os
 
+dir = "./pretrained_models"
+if not os.path.exists(dir):
+    os.mkdir(dir)
 directory = "./pretrained_models/resnet"  # 例如："/path/to/save/directory"
 if not os.path.exists(directory):
     os.mkdir(directory)
@@ -30,4 +33,7 @@ def download_and_save_resnet_models(directory):
 
 
 if __name__ == "__main__":
+    directory = "./pretrained_models/resnet"  # 例如："/path/to/save/directory"
+    if not os.path.exists(directory):
+        os.mkdir(directory)
     download_and_save_resnet_models(directory)
