@@ -1,3 +1,7 @@
+import torch
+import torchvision.models as models
+import os
+
 def save_model(model, path):
     torch.save(model.state_dict(), path)
 
