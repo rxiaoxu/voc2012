@@ -2,7 +2,7 @@ import torch
 import torchvision.models as models
 import os
 
-directory = "./model"  # 例如："/path/to/save/directory"
+directory = "./pretrained_models/resnet"  # 例如："/path/to/save/directory"
 if not os.path.exists(directory):
     os.mkdir(directory)
 def save_model(model, path):
