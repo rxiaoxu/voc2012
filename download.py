@@ -2,6 +2,9 @@ import torch
 import torchvision.models as models
 import os
 
+directory = "./model"  # 例如："/path/to/save/directory"
+if not os.path.exists(directory):
+    os.mkdir(directory)
 def save_model(model, path):
     torch.save(model.state_dict(), path)
 
@@ -27,9 +30,4 @@ def download_and_save_resnet_models(directory):
 
 
 if __name__ == "__main__":
-    directory = "./model"  # 例如："/path/to/save/directory"
-   
-
-    if not os.path.exists(directory):
-        os.mkdir(directory)
     download_and_save_resnet_models(directory)
